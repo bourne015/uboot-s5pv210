@@ -127,6 +127,8 @@ ifeq ($(ARCH),powerpc)
 ARCH = ppc
 endif
 
+ARCH=arm
+
 ifeq ($(obj)include/config.mk,$(wildcard $(obj)include/config.mk))
 
 # load ARCH, BOARD, and CPU configuration
@@ -144,7 +146,8 @@ ifeq ($(ARCH),arm)
 #CROSS_COMPILE = arm-linux-
 #CROSS_COMPILE = /usr/local/arm/4.4.1-eabi-cortex-a8/usr/bin/arm-linux-
 #CROSS_COMPILE = /usr/local/arm/4.2.2-eabi/usr/bin/arm-linux-
-CROSS_COMPILE = /usr/local/arm/arm-2009q3/bin/arm-none-linux-gnueabi-
+#CROSS_COMPILE = /usr/local/arm/arm-2009q3/bin/arm-none-linux-gnueabi-
+CROSS_COMPILE = $(CURDIR)/../android/prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-
 endif
 ifeq ($(ARCH),i386)
 CROSS_COMPILE = i386-linux-
