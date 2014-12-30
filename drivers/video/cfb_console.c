@@ -278,8 +278,15 @@ void	console_cursor (int state);
 #define VIDEO_LOGO_LUT_OFFSET	LINUX_LOGO_LUT_OFFSET
 #define VIDEO_LOGO_COLORS	LINUX_LOGO_COLORS
 #endif	/* CONFIG_VIDEO_BMP_LOGO */
+
+#ifdef SDCARD_UPDATER
+#define VIDEO_INFO_X		(0)
+#define VIDEO_INFO_Y		(0)
+#else
 #define VIDEO_INFO_X		(VIDEO_LOGO_WIDTH)
 #define VIDEO_INFO_Y		(VIDEO_FONT_HEIGHT/2)
+#endif
+
 #else	/* CONFIG_VIDEO_LOGO */
 #define VIDEO_LOGO_WIDTH	0
 #define VIDEO_LOGO_HEIGHT	0

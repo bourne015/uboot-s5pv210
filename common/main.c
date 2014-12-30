@@ -225,7 +225,7 @@ static __inline__ int abortboot(int bootdelay)
 	 */
 	if (bootdelay >= 0) {
 		if (tstc()) {	/* we got a key press	*/
-			(void) getc();  /* consume input	*/
+			//(void) getc();  /* consume input	*/
 			puts ("\b\b\b 0");
 			abort = 1;	/* don't auto boot	*/
 		}
@@ -244,7 +244,7 @@ static __inline__ int abortboot(int bootdelay)
 # ifdef CONFIG_MENUKEY
 				menukey = getc();
 # else
-				(void) getc();  /* consume input	*/
+				//(void) getc();  /* consume input	*/
 # endif
 				break;
 			}
@@ -267,6 +267,19 @@ static __inline__ int abortboot(int bootdelay)
 #endif	/* CONFIG_BOOTDELAY >= 0  */
 
 /****************************************************************************/
+
+#ifdef SDCARD_UPDATER
+static void ExecuteCmd(char *cmd)
+{
+	parse_string_outer(cmd, FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP);
+}
+
+extern int drv_video_init(void);
+extern void drv_system_init(void);
+#if !UPDATER_TYPE
+extern void backlight_off(void);
+#endif
+#endif
 
 void main_loop (void)
 {
@@ -397,6 +410,51 @@ void main_loop (void)
 	if (bootdelay >= 0 && s && !abortboot (bootdelay)) {
 #ifdef CONFIG_AUTOBOOT_KEYED
 		int prev = disable_ctrlc(1);	/* disable Control C checking */
+#endif
+
+#ifdef SDCARD_UPDATER
+{
+	char *updater = NULL;
+	updater = getenv("updater");
+
+	if(!updater){
+		setenv("updater", "need_update");
+		saveenv();
+		updater = getenv("updater");
+	}
+	printf("updater:%s\n", updater);
+
+	if(!strcmp(updater, "need_update")){
+		if(check_update_package()==0){
+			drv_video_init();
+			console_init_r();
+			printf("Success to check_update_package\n");
+			ExecuteCmd("fdisk -c 0");
+			ExecuteCmd("sdfuse flash bootloader u-boot.bin");
+			ExecuteCmd("sdfuse flash kernel zImage");
+			ExecuteCmd("sdfuse flash ramdisk ramdisk-uboot.img");
+			ExecuteCmd("sdfuse flash system system.img");
+			ExecuteCmd("sdfuse erase userdata");
+			ExecuteCmd("sdfuse erase cache");
+			setenv("updater", "no_need_update");
+			saveenv();
+#if !UPDATER_TYPE
+			backlight_off();
+#endif
+			ExecuteCmd("reset");
+		}
+		else{
+			drv_system_init();
+//			drv_video_init();//debug
+			console_init_r();
+			printf("Failed to check_update_package\n");
+		}
+	}
+	else{
+		setenv("updater", "need_update");
+		saveenv();
+	}
+}
 #endif
 
 #ifndef CFG_HUSH_PARSER

@@ -105,11 +105,13 @@ int get_mmc_part_info(char *device_name, int part_num, int *start, int *count, u
 struct mmc *find_mmc_device(int dev_num);
 #endif
 
+#ifndef SDCARD_UPDATER
 /* LCD */
 void LCD_turnon(void);
 void LCD_setfgcolor(unsigned int color);
 void LCD_setleftcolor(unsigned int color);
 void LCD_setprogress(int percentage);
+#endif
 
 /* Forward decl */
 static int rx_handler (const unsigned char *buffer, unsigned int buffer_size);
@@ -675,7 +677,9 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 				fastboot_tx_status(response, strlen(response), FASTBOOT_TX_ASYNC);
 
 				printf ("\ndownloading of %d bytes finished\n", download_bytes);
+#ifndef SDCARD_UPDATER
 				LCD_setprogress(0);
+#endif
 			}
 
 			/* Provide some feedback */
@@ -691,8 +695,10 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 					  (80 * 0x100000)))
 					printf("\n");
 
+#ifndef SDCARD_UPDATER
 				LCD_setfgcolor(0x2E8B57);
 				LCD_setprogress(download_bytes / (download_size/100));
+#endif
 			}
 		}
 		else
@@ -794,8 +800,10 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 #else
 			printf("erasing '%s'\n", ptn->name);
 #endif
+#ifndef SDCARD_UPDATER
 			LCD_setfgcolor(0x7FFFD4);
 			LCD_setprogress(100);
+#endif
 
 #if defined(CFG_FASTBOOT_SDMMCBSP)
 			// Temporary (but, simplest) implementation
@@ -994,8 +1002,10 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 			
 			struct fastboot_ptentry *ptn;
 
+#ifndef SDCARD_UPDATER
 			LCD_setfgcolor(0x8B4500);
 			LCD_setprogress(100);
+#endif
 
 			/* Special case: boot.img */
 			if (!strcmp("boot", cmdbuf + 6))
@@ -1119,7 +1129,9 @@ static int rx_handler (const unsigned char *buffer, unsigned int buffer_size)
 send_tx_status:
 		fastboot_tx_status(response, strlen(response), FASTBOOT_TX_ASYNC);
 
+#ifndef SDCARD_UPDATER
 		LCD_setprogress(0);
+#endif
 	} /* End of command */
 	
 	return ret;
@@ -1361,7 +1373,9 @@ static int set_partition_table()
 	fastboot_flash_dump_ptn();
 #endif
 
+#ifndef SDCARD_UPDATER
 	LCD_setleftcolor(0x1024C0);
+#endif
 
 	return 0;
 }
@@ -1446,7 +1460,9 @@ static int set_partition_table()
 	fastboot_flash_dump_ptn();
 #endif
 
+#ifndef SDCARD_UPDATER
 	LCD_setleftcolor(0x8a2be2);
+#endif
 
 	return 0;
 
@@ -1510,7 +1526,9 @@ int do_fastboot (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 			timeout_endtime = get_ticks();
 			timeout_endtime += timeout_ticks;
 
+#ifndef SDCARD_UPDATER
 			LCD_turnon();
+#endif
 
 			while (1)
 			{
@@ -1568,9 +1586,11 @@ int do_fastboot (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		/* Reset the board specific support */
 		fastboot_shutdown();
 
+#ifndef SDCARD_UPDATER
 		LCD_setfgcolor(0x000010);
 		LCD_setleftcolor(0x000010);
 		LCD_setprogress(100);
+#endif
 
 		/* restart the loop if a disconnect was detected */
 	} while (continue_from_disconnect);
@@ -1618,8 +1638,10 @@ static int update_from_sd (char *part, char *file)
 		block_dev_desc_t *dev_desc=NULL;
 
 		printf("Partition: %s, File: %s/%s\n", part, CFG_FASTBOOT_SDFUSE_DIR, file);
+#ifndef SDCARD_UPDATER
 		LCD_setfgcolor(0x2E8B57);
 		LCD_setprogress(100);
+#endif
 		dev_desc = get_dev("mmc", CFG_FASTBOOT_SDFUSE_MMCDEV);
 		if (dev_desc == NULL) {
 			printf ("** Invalid boot device **\n");
@@ -1716,9 +1738,15 @@ int do_sdfuse (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	}
 	else if ((argc == 2) && !strcmp(argv[1], "flashall"))
 	{
+#ifndef SDCARD_UPDATER
 		LCD_turnon();
+#endif
 
-		if (update_from_sd("boot", "boot.img"))
+		if (update_from_sd("bootloader", "u-boot.bin"))
+			goto err_sdfuse;
+		if (update_from_sd("kernel", "zImage"))
+			goto err_sdfuse;
+		if (update_from_sd("ramdisk", "ramdisk-uboot.img"))
 			goto err_sdfuse;
 		if (update_from_sd("system", "system.img"))
 			goto err_sdfuse;
@@ -1732,7 +1760,9 @@ int do_sdfuse (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	}
 	else if ((argc == 4) && !strcmp(argv[1], "flash"))
 	{
+#ifndef SDCARD_UPDATER
 		LCD_turnon();
+#endif
 
 		if (update_from_sd(argv[2], argv[3]))
 			goto err_sdfuse;
@@ -1741,7 +1771,9 @@ int do_sdfuse (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	}
 	else if ((argc == 3) && !strcmp(argv[1], "erase"))
 	{
+#ifndef SDCARD_UPDATER
 		LCD_turnon();
+#endif
 
 		if (update_from_sd(argv[2], NULL))
 			goto err_sdfuse;
@@ -1757,9 +1789,11 @@ int do_sdfuse (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 
 err_sdfuse:
+#ifndef SDCARD_UPDATER
 	LCD_setfgcolor(0x000010);
 	LCD_setleftcolor(0x000010);
 	LCD_setprogress(100);
+#endif
 
 	if (enable_reset)
 		do_reset (NULL, 0, 0, NULL);
@@ -1861,6 +1895,44 @@ unsigned int fastboot_flash_get_ptn_count(void)
 	return pcount;
 }
 
+int check_update_package ()
+{
+	int i, ret = 0;
+
+	long size;
+	unsigned long offset;
+	char filename[32];
+	char package[4][25] = {"u-boot.bin", "zImage", "ramdisk-uboot.img", "system.img"};
+	block_dev_desc_t *dev_desc=NULL;
+	struct mmc *mmc = find_mmc_device(CFG_FASTBOOT_SDFUSE_MMCDEV);
+
+	if (mmc_init(mmc)) {
+		printf("sdmmc init is failed.\n");
+	}
+
+	dev_desc = get_dev("mmc", CFG_FASTBOOT_SDFUSE_MMCDEV);
+	if (dev_desc == NULL) {
+		printf ("** Invalid boot device **\n");
+		return 1;
+	}
+	if (fat_register_device(dev_desc, CFG_FASTBOOT_SDFUSE_MMCPART) != 0) {
+		printf ("** Invalid partition **\n");
+		return 1;
+	}
+
+	for(i = 0; i < 4; i++){
+		sprintf(filename, "%s/%s", CFG_FASTBOOT_SDFUSE_DIR, package[i]);
+		offset = CFG_FASTBOOT_TRANSFER_BUFFER;
+		size = file_fat_read (filename, (unsigned char *) offset, 1);
+
+		if (size == -1) {
+			printf("Failed to read %s\n", filename);
+			return 1;
+		}
+	}
+
+	return ret;
+}
 
 
 #endif	/* CONFIG_FASTBOOT */

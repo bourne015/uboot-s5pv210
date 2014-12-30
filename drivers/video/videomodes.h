@@ -22,8 +22,14 @@
  */
 
 
+#ifdef SDCARD_UPDATER
+#ifndef CFG_SYS_DEFAULT_VIDEO_MODE
+#define CFG_SYS_DEFAULT_VIDEO_MODE	0x305
+#endif
+#else
 #ifndef CFG_DEFAULT_VIDEO_MODE
 #define CFG_DEFAULT_VIDEO_MODE	0x301
+#endif
 #endif
 
 /* Some mode definitions */
@@ -74,7 +80,15 @@ struct ctfb_vesa_modes {
 
 #define RES_MODE_640x480	0
 #define RES_MODE_800x600	1
+#ifdef SDCARD_UPDATER
+#if UPDATER_TYPE
+#define RES_MODE_1024x600	2
+#else
+#define RES_MODE_480x800	2
+#endif
+#else
 #define RES_MODE_1024x768	2
+#endif
 #define RES_MODE_960_720	3
 #define RES_MODE_1152x864	4
 #define RES_MODE_1280x1024	5

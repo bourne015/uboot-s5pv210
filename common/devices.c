@@ -68,7 +68,11 @@ int nulldev_input(void)
  **************************************************************************
  */
 
+#ifdef SDCARD_UPDATER
+void drv_system_init (void)
+#else
 static void drv_system_init (void)
+#endif
 {
 	device_t dev;
 
@@ -186,7 +190,9 @@ int devices_init (void)
 	drv_lcd_init ();
 #endif
 #if defined(CONFIG_VIDEO) || defined(CONFIG_CFB_CONSOLE)
+#ifndef SDCARD_UPDATER
 	drv_video_init ();
+#endif
 #endif
 #ifdef CONFIG_KEYBOARD
 	drv_keyboard_init ();
@@ -194,7 +200,9 @@ int devices_init (void)
 #ifdef CONFIG_LOGBUFFER
 	drv_logbuff_init ();
 #endif
+#ifndef SDCARD_UPDATER
 	drv_system_init ();
+#endif
 #ifdef CONFIG_SERIAL_MULTI
 	serial_devices_init ();
 #endif

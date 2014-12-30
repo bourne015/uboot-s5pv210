@@ -601,6 +601,25 @@
 //#define CFG_FASTBOOT_NANDBSP
 #define CFG_FASTBOOT_SDMMCBSP
 
+#define SDCARD_UPDATER
+#ifdef SDCARD_UPDATER
+#define UPDATER_TYPE	0	//0:V70	1:V32G
+#define CONFIG_CFB_CONSOLE
+#define VIDEO_FB_16BPP_WORD_SWAP
+#define VIDEO_FB_16BPP_PIXEL_SWAP     //the color palette,bpp is bits per pixel
+#define CONFIG_VIDEO              //Video support
+#define CONFIG_VIDEO_S5PV210
+#define CONFIG_VIDEO_LOGO         //display Linux Logo in upper left corner
+#define CONFIG_VIDEO_BMP_LOGO        //use bmp_logo instead of linux_logo
+#define CONFIG_SPLASH_SCREEN    //enable splash screen support,implicitly enable U-Boot Bitmap Support.
+#define CONFIG_VIDEO_SW_CURSOR
+#define DEBUG_CFB_CONSOLE
+#define CONFIG_SYS_VIDEO_VCLOCK_HZ     (133000000)
+#define VIDEO_KBD_INIT_FCT  0       //init function for keyboard
+#define VIDEO_TSTC_FCT  serial_tstc   //keyboard_tstc function
+#define VIDEO_GETC_FCT  serial_getc   //keyboard_getc function
+#endif
+
 /* LCD setting */
 //#define CFG_LCD_TL2796		// for C110 - narrow LCD
 #define CFG_LCD_NONAME1			// for V210 - wide LCD

@@ -84,10 +84,18 @@ const struct ctfb_vesa_modes vesa_modes[VESA_MODES_COUNT] = {
 	{0x313, RES_MODE_800x600, 15},
 	{0x314, RES_MODE_800x600, 16},
 	{0x315, RES_MODE_800x600, 24},
+#ifdef SDCARD_UPDATER
+#if UPDATER_TYPE
+	{0x305, RES_MODE_1024x600, 16},
+#else
+	{0x305, RES_MODE_480x800, 16},
+#endif
+#else
 	{0x305, RES_MODE_1024x768, 8},
 	{0x316, RES_MODE_1024x768, 15},
 	{0x317, RES_MODE_1024x768, 16},
 	{0x318, RES_MODE_1024x768, 24},
+#endif
 	{0x161, RES_MODE_1152x864, 8},
 	{0x162, RES_MODE_1152x864, 15},
 	{0x163, RES_MODE_1152x864, 16},
@@ -98,9 +106,21 @@ const struct ctfb_vesa_modes vesa_modes[VESA_MODES_COUNT] = {
 };
 const struct ctfb_res_modes res_mode_init[RES_MODES_COUNT] = {
 	/* x	 y pixclk   le	ri  up	lo   hs vs  s  vmode */
+
+//DOTCLK = fframe ¡Á (X + HBP + HFP+HSPW ) ¡Á (Y + VBP + VFP+VSPW)   ( MHz) 
+//pixclock = 10^12 / DOTCLK= 10^12 / £¨fframe ¡Á (X + HBP + HFP+HSPW ) ¡Á (Y + VBP + VFP+VSPW)£© ( p second )
+
 	{640, 480, 39721, 40, 24, 32, 11, 96, 2, 0, FB_VMODE_NONINTERLACED},
 	{800, 600, 27778, 64, 24, 22, 1, 72, 2, 0, FB_VMODE_NONINTERLACED},
+#ifdef SDCARD_UPDATER
+#if UPDATER_TYPE
+	{1024, 600, 19528, 150, 150, 20, 10, 20, 5, 0, FB_VMODE_NONINTERLACED},
+#else
+	{480, 800, 40675, 8, 13, 5, 7, 3, 1, 0, FB_VMODE_NONINTERLACED},
+#endif
+#else
 	{1024, 768, 15384, 168, 8, 29, 3, 144, 4, 0, FB_VMODE_NONINTERLACED},
+#endif
 	{960, 720, 13100, 160, 40, 32, 8, 80, 4, 0, FB_VMODE_NONINTERLACED},
 	{1152, 864, 12004, 200, 64, 32, 16, 80, 4, 0, FB_VMODE_NONINTERLACED},
 	{1280, 1024, 9090, 200, 48, 26, 1, 184, 3, 0, FB_VMODE_NONINTERLACED},

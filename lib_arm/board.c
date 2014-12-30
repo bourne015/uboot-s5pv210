@@ -693,7 +693,9 @@ void start_armboot (void)
 
 	jumptable_init ();
 #if !defined(CONFIG_SMDK6442)
+#ifndef SDCARD_UPDATER
 	console_init_r ();	/* fully init console as a device */
+#endif
 #endif
 
 #if defined(CONFIG_MISC_INIT_R)
