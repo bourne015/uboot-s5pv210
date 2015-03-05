@@ -45,6 +45,8 @@ GraphicDevice smi;
 #define S5PV210_MP07_DAT	(ELFIN_GPIO_BASE + MP07DAT_OFFSET)
 #define S5PV210_GPJ3_CON 	(ELFIN_GPIO_BASE + GPJ3CON_OFFSET)
 #define S5PV210_GPJ3_DAT	(ELFIN_GPIO_BASE + GPJ3DAT_OFFSET)
+#define S5PV210_GPH2_CON 	(ELFIN_GPIO_BASE + GPH2CON_OFFSET)
+#define S5PV210_GPH2_DAT	(ELFIN_GPIO_BASE + GPH2DAT_OFFSET)
 
 #define S5P_FB_SPI_CLK_CON S5PV210_MP01_CON
 #define S5P_FB_SPI_CLK_DAT S5PV210_MP01_DAT
@@ -62,9 +64,9 @@ GraphicDevice smi;
 #define S5P_FB_SPI_RESET_DAT S5PV210_GPJ3_DAT
 #define S5P_FB_SPI_RESET_SHIFT 7
 
-#define S5P_FB_SPI_PWREN_CON S5PV210_MP07_CON
-#define S5P_FB_SPI_PWREN_DAT S5PV210_MP07_DAT
-#define S5P_FB_SPI_PWREN_SHIFT 6
+#define S5P_FB_SPI_PWREN_CON S5PV210_GPH2_CON
+#define S5P_FB_SPI_PWREN_DAT S5PV210_GPH2_DAT
+#define S5P_FB_SPI_PWREN_SHIFT 7
 
 static void gpio_set_value(unsigned long gpio_group_con, unsigned long gpio_group_data, int value, int shift)
 {
@@ -198,7 +200,13 @@ static  void write_lcdregister(unsigned char SSD2123_data)//,unsigned char NUMoF
 
 static void ili9806e_reset_lcd(void)
 {
-	lq_spi_lcd_pwren(1);
+	extern int v70_hw_ver;
+	/*in hw3.0 power on is: 0, in hw3.1 power on is : 1*/
+	if (v70_hw_ver == 30) {
+		lq_spi_lcd_pwren(0);
+	} else {
+		lq_spi_lcd_pwren(1);
+	}
 	msleep(1); 
 	lq_spi_lcd_reset(0);
 	msleep(1);  

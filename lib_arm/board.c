@@ -753,6 +753,7 @@ extern void dm644x_eth_set_mac_addr (const u_int8_t *addr);
 	ide_init();
 #endif
 
+	s5p_adc_setup();
 	/* main_loop() can return to retry autoboot, if so just run it again. */
 	for (;;) {
 		main_loop ();

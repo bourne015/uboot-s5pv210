@@ -281,6 +281,108 @@ extern void backlight_off(void);
 #endif
 #endif
 
+void RealARMMenu(void)
+{
+	unsigned char select;
+	unsigned char ch;
+	int i;
+    unsigned char unlock_key[11]={0x02,0x0c,0x12,0x00,0x01,0x00,0x01,0x1f,0x00,0x00,0x00};
+	unsigned char reset_key[11]={0x02,0x0c,0x14,0x00,0x01,0x00,0x01,0x19,0x00,0x00,0x00};
+
+	
+	while(1) {
+		printf("\n");
+		printf("################## Vanstone User Menu for V70 ##################\n");
+		printf("########################### For Android 4.0 ############################\n");
+		printf("[f] use fastboot\n");
+		printf("[t] set tamper trigger unlocked\n");
+		printf("[r] reboot the u-boot\n");
+		printf("[o] boot without kernel debug msg, use for pinpad and external printer\n");
+		printf("[b] boot with kernel debug msg, only for developer\n");
+		printf("[e] exit to command line\n");
+
+		printf("-----------------------------Select---------------------------------\n");
+		printf("Enter your Selection:");
+
+		select = getc();
+		printf("%c\n", select >= ' ' && select <= 127 ? select : ' ');
+
+		switch(select)
+		{
+			//[b] Boot the system
+			case 'B':
+			case 'b':
+				ExecuteCmd(CONFIG_BOOTCOMMAND);
+				break;
+
+			//[e] Exit to command line
+			case 'E':
+			case 'e':
+				return;
+
+			//[r] Reboot the u-boot
+			case 'R': case 'r':
+				ExecuteCmd("reset");
+				break;
+
+			//[u] Use fastboot
+			case 'F': case 'f':
+				ExecuteCmd("fastboot");
+				break;
+
+			//[o] boot without kernel debug msg, use for pinpad and external printer
+			case 'O': case 'o':
+				{
+					char cmdline[256]="setenv bootargs console=/dev/null";
+					ExecuteCmd(cmdline);
+					//check_mmk();
+					ExecuteCmd(CONFIG_BOOTCOMMAND);
+				}
+				break;
+
+			//[p] boot with kernel debug msg, only for developer
+			case 'T': case 't':
+				{
+					printf("try to unlock\n");
+					//for(i=0;i<11;i++)
+					//	serial3_putc(unlock_key[i]);
+					//udelay(100000);
+					//for(i=0;i<11;i++)
+					//	serial3_putc(reset_key[i]);	
+				}
+				break;
+			
+
+			default:
+				break;
+		}
+	}
+}
+
+/*
+ *30 = hardware 3.0; 31 = hardware 3.1
+ */
+ int v70_hw_ver;
+#define V70_INF_REG5 0xe010f014
+static void v70_hw_check(void)
+{
+	int hw_adc;
+
+	hw_adc = s3c_bat_get_adc_data(5);
+	hw_adc = (hw_adc*3300/4096);
+
+	if (hw_adc == 0) {
+		v70_hw_ver = 30;
+	} else if (hw_adc > 900 && hw_adc <=1300) {
+		v70_hw_ver = 31;
+	} else if (hw_adc >= 1400 && hw_adc <= 1800) {
+		v70_hw_ver = 32;
+	}
+
+	writel(v70_hw_ver, V70_INF_REG5);
+	printf("v70a hardware version: %d, adc:%d\n", v70_hw_ver, hw_adc);
+}
+
 void main_loop (void)
 {
 #ifndef CFG_HUSH_PARSER
@@ -384,6 +486,7 @@ void main_loop (void)
 
 	debug ("### main_loop entered: bootdelay=%d\n\n", bootdelay);
 
+	v70_hw_check();
 # ifdef CONFIG_BOOT_RETRY_TIME
 	init_cmd_timeout ();
 # endif	/* CONFIG_BOOT_RETRY_TIME */
@@ -490,6 +593,7 @@ void main_loop (void)
 	    video_banner();
 	}
 #endif
+	RealARMMenu();
 
 	/*
 	 * Main Loop for Monitor Command Processing
