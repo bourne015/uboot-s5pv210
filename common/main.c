@@ -560,6 +560,8 @@ void main_loop (void)
 }
 #endif
 
+	wait_powerkey();
+
 #ifndef CFG_HUSH_PARSER
 		run_command (s, 0);
 #else
