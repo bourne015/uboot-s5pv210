@@ -371,6 +371,27 @@ uart_asm_init:
 	str    r1, [r0, #GPC0DAT_OFFSET]
 #endif
 
+    /*   init serial3         */
+	ldr r0, =ELFIN_UART_SERIAL4_BASE		
+	mov r1, #0x0
+	str r1, [r0, #UFCON_OFFSET]
+	str r1, [r0, #UMCON_OFFSET]
+	
+	mov r1, #0x3
+	str r1, [r0, #ULCON_OFFSET]
+	
+	ldr r1, =0x3c5
+	str r1, [r0, #UCON_OFFSET]
+	
+	ldr r1, =UART_UBRDIV_VAL
+	str r1, [r0, #UBRDIV_OFFSET]
+	
+	ldr r1, =UART_UDIVSLOT_VAL
+	str r1, [r0, #UDIVSLOT_OFFSET]
+
+
+
+
 	ldr	r0, =ELFIN_UART_CONSOLE_BASE		@0xEC000000
 	mov	r1, #0x0
 	str	r1, [r0, #UFCON_OFFSET]

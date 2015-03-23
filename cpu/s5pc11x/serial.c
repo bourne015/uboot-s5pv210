@@ -73,6 +73,17 @@ int serial_getc(void)
 	return uart->URXH & 0xff;
 }
 
+int serial3_getc(void)
+{
+	S5PC11X_UART *const uart = S5PC11X_GetBase_UART(S5PC11X_UART3);
+
+	/* wait for character to arrive */
+	while (!(uart->UTRSTAT & 0x1));
+
+	return uart->URXH & 0xff;
+}
+
+
 #ifdef CONFIG_HWFLOW
 static int hwflow = 0;		/* turned off by default */
 int hwflow_onoff(int on)
@@ -132,6 +143,25 @@ void serial_putc(const char c)
 	if (c == '\n')
 		serial_putc('\r');
 }
+
+void serial3_putc(const char c)
+{
+	S5PC11X_UART *const uart = S5PC11X_GetBase_UART(S5PC11X_UART3);
+
+	/* wait for room in the tx FIFO */
+	while (!(uart->UTRSTAT & 0x2));
+	
+
+	uart->UTXH = c;
+
+
+	/* If \n, also do \r */
+	if (c == '\n')
+		serial3_putc('\r');
+
+}
+
+
 
 /*
  * Test whether a character is in the RX buffer
