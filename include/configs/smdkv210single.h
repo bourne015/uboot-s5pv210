@@ -633,4 +633,6 @@
 #define CONFIG_BOOTCOMMAND	"movi read kernel 20008000; movi read rootfs 4F000000 180000; bootm 20008000 4F000000"
 #endif
 
+//#define CONFIG_K21_TRIGGER_ON
+
 #endif	/* __CONFIG_H */

@@ -30,6 +30,8 @@
 #include <common.h>
 #include <watchdog.h>
 #include <command.h>
+#include "../drivers/trigger/trigger.h"
+
 #ifdef CONFIG_MODEM_SUPPORT
 #include <malloc.h>		/* for free() prototype */
 #endif
@@ -344,11 +346,11 @@ void RealARMMenu(void)
 			case 'T': case 't':
 				{
 					printf("try to unlock\n");
-					//for(i=0;i<11;i++)
-					//	serial3_putc(unlock_key[i]);
-					//udelay(100000);
-					//for(i=0;i<11;i++)
-					//	serial3_putc(reset_key[i]);	
+					for(i=0;i<11;i++)
+						serial3_putc(unlock_key[i]);
+					udelay(100000);
+					for(i=0;i<11;i++)
+						serial3_putc(reset_key[i]);	
 				}
 				break;
 			
@@ -561,6 +563,8 @@ void main_loop (void)
 #endif
 
 	wait_powerkey();
+
+	check_k21_lock();
 
 #ifndef CFG_HUSH_PARSER
 		run_command (s, 0);

@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2000-2003
+# (C) Copyright 2000-2007
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
 #
 # See file CREDITS for list of people who contributed to this
@@ -12,7 +12,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
@@ -20,28 +20,28 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307 USA
 #
-
 include $(TOPDIR)/config.mk
 
-LIB	= lib$(CPU).a
+LIB	:= $(obj)libtrigger.a
 
-START	= start.o
+COBJS-y += trigger.o
+COBJS-y += unlocked.o
+COBJS-y += des.o
 
-OBJS	= nand_cp.o serial.o  usb_ohci.o \
-		interrupts.o cpu.o nand.o onenand.o onenand_cp.o \
-		usbd-otg-hs.o movi.o setup_hsmmc.o setup_ide.o \
-		fastboot.o fimd.o pmic.o k21.o charge_disp.o adc.o
+COBJS	:= $(COBJS-y)
+SRCS	:= $(COBJS:.o=.c)
+OBJS	:= $(addprefix $(obj),$(COBJS))
 
-all:	.depend $(START) $(LIB)
+all:	$(LIB)
 
-$(LIB):	$(OBJS)
-	$(AR) crv $@ $(OBJS)
+$(LIB):	$(obj).depend $(OBJS)
+	$(AR) $(ARFLAGS) $@ $(OBJS)
 
 #########################################################################
 
-.depend:	Makefile $(START:.o=.S) $(OBJS:.o=.c)
-		$(CC) -M $(CFLAGS) $(START:.o=.S) $(OBJS:.o=.c) > $@
+# defines $(obj).depend target
+include $(SRCTREE)/rules.mk
 
-sinclude .depend
+sinclude $(obj).depend
 
 #########################################################################

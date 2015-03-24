@@ -248,6 +248,7 @@ LIBS += drivers/rtc/librtc.a
 LIBS += drivers/serial/libserial.a
 LIBS += drivers/usb/libusb.a
 LIBS += drivers/video/libvideo.a
+LIBS += drivers/trigger/libtrigger.a
 LIBS += common/libcommon.a
 LIBS += libfdt/libfdt.a
 LIBS += api/libapi.a
@@ -416,6 +417,7 @@ TAG_SUBDIRS += drivers/serial
 TAG_SUBDIRS += drivers/spi
 TAG_SUBDIRS += drivers/usb
 TAG_SUBDIRS += drivers/video
+TAG_SUBDIRS += drivers/trigger
 
 tags ctags:
 		ctags -w -o $(obj)ctags `find $(SUBDIRS) $(TAG_SUBDIRS) \
